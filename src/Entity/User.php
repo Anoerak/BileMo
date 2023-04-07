@@ -6,7 +6,10 @@ use App\Repository\UserRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use Hateoas\Configuration\Annotation as Hateoas;
+
 use JMS\Serializer\Annotation\Groups;
+use JMS\Serializer\Annotation\Since;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;

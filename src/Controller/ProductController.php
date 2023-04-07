@@ -3,8 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\User;
-
 use App\Entity\Product;
+use App\Services\DuplicateCheckingService;
+use App\Services\UpdateEntitiesService;
+
+use Nelmio\ApiDocBundle\Annotation\Model;
+
+use Doctrine\ORM\EntityManagerInterface;
+
+use JMS\Serializer\SerializerInterface as JmsSerializerInterface;
+use JMS\Serializer\SerializationContext;
 
 use OpenApi\Attributes as OA;
 use App\Services\ErrorValidator;
@@ -12,26 +20,16 @@ use App\Services\ErrorValidator;
 use App\Services\VersioningService;
 use App\Repository\ProductRepository;
 
-use App\Services\UpdateEntitiesService;
-
-use Symfony\Config\JmsSerializerConfig;
-use Doctrine\ORM\EntityManagerInterface;
-
-use JMS\Serializer\SerializationContext;
-
-use Nelmio\ApiDocBundle\Annotation\Model;
-use App\Services\DuplicateCheckingService;
 use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use JMS\Serializer\SerializerInterface as JmsSerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class ProductController extends AbstractController
 {
@@ -121,9 +119,9 @@ class ProductController extends AbstractController
     }
     /* #endregion */
 
-    /* #region GET One User */
+    /* #region GET One Product */
     /**
-     * GET method to get one user
+     * GET method to get one product
      */
     /* #region Doc */
     #[OA\Response(
@@ -155,9 +153,9 @@ class ProductController extends AbstractController
     }
     /* #endregion */
 
-    /* #region POST a User */
+    /* #region POST a Product */
     /**
-     * POST method to create a user
+     * POST method to create a product
      */
     /* #region Doc */
     #[OA\Response(
@@ -176,6 +174,8 @@ class ProductController extends AbstractController
         )
     )]
     /* #endregion */
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     #[Route('/api/product', name: 'app_create_product', methods: 'POST')]
     public function createProduct(Request $request): JsonResponse
     {
@@ -198,6 +198,7 @@ class ProductController extends AbstractController
         $context = $request->toArray();
         $userList = isset($context['owner']) ? $context['owner'] : null;
         if ($userList != null) {
+            $product->getOwner()->clear();
             foreach ($userList as $userId) {
                 $user = $this->em->getRepository(User::class)->findBy(['id' => $userId]);
                 if (!$user) {
@@ -226,103 +227,104 @@ class ProductController extends AbstractController
 
         $location = $this->router->generate('app_detail_product', ['id' => $product->getId()]);
 
-        dump($product);
         return new JsonResponse($jsonProduct, Response::HTTP_CREATED, ['Location' => $location], true);
     }
     /* #endregion */
 
-    // /* #region PUT a User */
-    // /**
-    //  * PUT method to update a user
-    //  */
-    // /* #region Doc */
-    // #[OA\Response(
-    //     response: 200,
-    //     description: 'Update a user',
-    //     content: new OA\JsonContent(
-    //         type: 'array',
-    //         items: new OA\Items(ref: new Model(type: User::class, groups: ['user:read']))
-    //     )
-    // )]
-    // #[OA\RequestBody(
-    //     description: 'User object that needs to be updated to the store',
-    //     required: true,
-    //     content: new OA\JsonContent(
-    //         ref: new Model(type: User::class, groups: ['user:write'])
-    //     )
-    // )]
-    // #[OA\Parameter(
-    //     name: 'id',
-    //     in: 'path',
-    //     description: 'The user id',
-    //     required: true,
-    //     schema: new OA\Schema(type: 'integer')
-    // )]
-    // /* #endregion */
-    // #[Route('/api/user/{id}', name: 'app_update_user', methods: 'PUT')]
-    // #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
-    // public function updateCustomer(User $user, Request $request): JsonResponse
-    // {
+    /* #region PUT a User */
+    /**
+     * PUT method to update a user
+     */
+    /* #region Doc */
+    #[OA\Response(
+        response: 200,
+        description: 'Update a product',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+        )
+    )]
+    #[OA\RequestBody(
+        description: 'Product object that needs to be updated to the db',
+        required: true,
+        content: new OA\JsonContent(
+            ref: new Model(type: Product::class, groups: ['guest'])
+        )
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        description: 'The product id',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    /* #endregion */
+    #[Route('/api/product/{id}', name: 'app_update_product', methods: 'PUT')]
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
+    public function updateProduct(Product $product, Request $request): JsonResponse
+    {
 
-    //     $newUser = $this->serializerInterface->deserialize($request->getContent(), User::class, 'json');
-    //     // We go through the new customer's properties and check if there is something to update
-    //     $update = $this->updateEntity->update($user, $newUser, $request);
-    //     if ($update) {
-    //         return $update;
-    //     }
+        $newProduct = $this->serializerInterface->deserialize($request->getContent(), Product::class, 'json');
+        // We go through the new customer's properties and check if there is something to update
+        $update = $this->updateEntity->update($product, $newProduct, $request);
+        if ($update) {
+            return $update;
+        }
 
-    //     // We check if there are errors
-    //     $this->validator->getErrors($user);
+        // We check if there are errors
+        $this->validator->getErrors($product);
 
-    //     // We persist the updated informations
-    //     $this->em->persist($user);
-    //     $this->em->flush();
+        // We persist the updated informations
+        $this->em->persist($product);
+        $this->em->flush();
 
-    //     // We prepare the Response
-    //     $context = SerializationContext::create()->setGroups(['user:read']);
-    //     $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
+        // We prepare the Response
+        $context = SerializationContext::create()->setGroups(['guest']);
+        $jsonProduct = $this->jmsSerializer->serialize($product, 'json', $context);
 
-    //     $location = $this->router->generate('app_detail_user', ['id' => $user->getId()]);
+        $location = $this->router->generate('app_detail_product', ['id' => $product->getId()]);
 
-    //     return new JsonResponse($jsonUser, Response::HTTP_OK, ['Location' => $location], true);
+        return new JsonResponse($jsonProduct, Response::HTTP_OK, ['Location' => $location], true);
 
-    //     // We clear the cache
-    //     $this->tagCache->invalidateTags(['customerCache']);
-    // }
-    // /* #endregion */
+        // We clear the cache
+        $this->tagCache->invalidateTags(['productCache']);
+    }
+    /* #endregion */
 
-    // /* #region DELETE a User */
-    // /**
-    //  * DELETE method to delete a customer
-    //  */
-    // /* #region Doc */
-    // #[OA\Response(
-    //     response: 200,
-    //     description: 'Delete a user',
-    //     content: new OA\JsonContent(
-    //         type: 'array',
-    //         items: new OA\Items(ref: new Model(type: User::class, groups: ['user:read']))
-    //     )
-    // )]
-    // #[OA\Parameter(
-    //     name: 'id',
-    //     in: 'path',
-    //     description: 'The user id',
-    //     required: true,
-    //     schema: new OA\Schema(type: 'integer')
-    // )]
-    // /* #endregion */
-    // #[Route('/api/user/{id}', name: 'app_delete_user', methods: 'DELETE')]
-    // #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
-    // public function deleteUser(User $user): JsonResponse
-    // {
-    //     $userId = $user->getId();
-    //     $this->tagCache->invalidateTags(['userCache']);
-    //     $this->em->remove($user);
-    //     $this->em->flush();
+    /* #region DELETE a Product */
+    /**
+     * DELETE method to delete a product
+     */
+    /* #region Doc */
+    #[OA\Response(
+        response: 200,
+        description: 'Delete a product',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+        )
+    )]
+    #[OA\Parameter(
+        name: 'id',
+        in: 'path',
+        description: 'The product id',
+        required: true,
+        schema: new OA\Schema(type: 'integer')
+    )]
+    /* #endregion */
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
+    #[Route('/api/product/{id}', name: 'app_delete_product', methods: 'DELETE')]
+    public function deleteUser(Product $product): JsonResponse
+    {
+        $productId = $product->getId();
+        $this->tagCache->invalidateTags(['productCache']);
+        $this->em->remove($product);
+        $this->em->flush();
 
-    //     // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
-    //     return new JsonResponse(['status' => 'User' . $userId . ' deleted'], Response::HTTP_OK);
-    // }
-    // /* #endregion */
+        // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
+        return new JsonResponse(['status' => 'Product ' . $productId . ' deleted'], Response::HTTP_OK);
+    }
+    /* #endregion */
 }

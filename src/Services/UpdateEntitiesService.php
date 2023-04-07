@@ -25,9 +25,7 @@ class UpdateEntitiesService
 	public function update($entity, $data, $request)
 	{
 		switch (get_class($entity)) {
-				/*-----------------------
-			| Customer Entity
-			-----------------------*/
+				/* #region Customer Entity */
 			case 'App\Entity\Customer':
 				// We check the data and update the customer if anything changed
 				if ($data->getEmail() !== null && $entity->getEmail() !== $data->getEmail()) {
@@ -51,9 +49,9 @@ class UpdateEntitiesService
 					}
 				}
 				break;
-				/*-----------------------
-			| User Entity
-			-----------------------*/
+				/* #endregion */
+
+				/* #region User Entity */
 			case 'App\Entity\User':
 				// We check the data and update the customer if anything changed
 				if ($data->getEmail() !== null && $entity->getEmail() !== $data->getEmail()) {
@@ -81,12 +79,37 @@ class UpdateEntitiesService
 					$entity->setCustomer($customer[0]);
 				}
 				break;
-				/*-----------------------
-			| Product Entity
-			-----------------------*/
-				// case 'App\Entity\Product':
-				// 	$entity = $this->updateProject($entity, $data);
-				// 	break;
+				/* #endregion */
+
+				/* #region Product Entity */
+			case 'App\Entity\Product':
+				// We check the data and update the customer if anything changed
+				if (
+					$data->getName() !== null && $entity->getName() !== $data->getName()
+				) {
+					$entity->setName($data->getName());
+				}
+				if ($data->getDescription() !== null && $entity->getDescription() !== $data->getDescription()) {
+					$entity->setDescription($data->getDescription());
+				}
+				if (
+					$data->getPrice() !== null && $entity->getPrice() !== $data->getPrice()
+				) {
+					$entity->setPrice($data->getPrice());
+				}
+				// We get the arrays from the request
+				$context = $request->toArray();
+				if (isset($context['owner'])) {
+					foreach ($context['owner'] as $ownerId) {
+						$owner = $this->em->getRepository(User::class)->findBy(['id' => $ownerId]);
+						if (!$owner) {
+							return new JsonResponse(['message' => 'This user does not exist'], Response::HTTP_BAD_REQUEST);
+						}
+						$entity->addOwner($owner[0]);
+					}
+				}
+				break;
+				/* #endregion */
 			default:
 				break;
 		}

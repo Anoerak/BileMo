@@ -330,7 +330,7 @@ class CustomerController extends AbstractController
         $this->em->flush();
 
         // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
-        return new JsonResponse(['status' => 'Customer' . $customerId . ' deleted'], Response::HTTP_OK);
+        return new JsonResponse(['status' => 'Customer ' . $customerId . ' deleted'], Response::HTTP_OK);
     }
     /* #endregion */
 }
