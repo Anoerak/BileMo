@@ -35,7 +35,7 @@ class Product
     private ?string $price = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'products', cascade: ['persist'])]
-    #[Groups(['admin', 'user', 'guest'])]
+    #[Groups(['admin', 'user'])]
     private Collection $owner;
 
     public function __construct()
