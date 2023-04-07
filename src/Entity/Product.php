@@ -3,10 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+
+use Doctrine\DBAL\Types\Types;
+
+use Doctrine\ORM\Mapping as ORM;
+
+use JMS\Serializer\Annotation\Groups;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -14,18 +19,23 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['admin', 'user', 'guest'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['admin', 'user', 'guest'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['admin', 'user', 'guest'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['admin', 'user', 'guest'])]
     private ?string $price = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'products')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'products', cascade: ['persist'])]
+    #[Groups(['admin', 'user', 'guest'])]
     private Collection $owner;
 
     public function __construct()

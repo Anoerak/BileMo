@@ -2,37 +2,106 @@
 
 namespace App\Entity;
 
-use App\Repository\CustomerRepository;
-
 use Doctrine\ORM\Mapping as ORM;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Repository\CustomerRepository;
+
+use Hateoas\Configuration\Annotation as Hateoas;
+
+use JMS\Serializer\Annotation\Since;
+use JMS\Serializer\Annotation\Groups;
+
 use Doctrine\Common\Collections\Collection;
-
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use JMS\Serializer\Annotation\Type;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
+
+
+/**
+ * @Hateoas\Relation(
+ *     "get",
+ *     href = @Hateoas\Route(
+ *        "app_detail_customer",
+ *        parameters = { "id" = "expr(object.getId())" },
+ *        absolute = true
+ *     ),
+ *   exclusion = @Hateoas\Exclusion(
+ *      groups = { "admin" },
+ *      excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *   )
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "delete",
+ *      href = @Hateoas\Route(
+ *         "app_delete_customer",
+ *        parameters = { "id" = "expr(object.getId())" },
+ *      absolute = true
+ *   ),
+ *  exclusion = @Hateoas\Exclusion(
+ *   groups = { "admin" },
+ *   excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *  )
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "update",
+ *      href = @Hateoas\Route(
+ *          "app_update_customer",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          groups = { "admin" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *      )
+ *  )
+ * 
+ * @Hateoas\Relation(
+ *     "app_create",
+ *      href = @Hateoas\Route(
+ *          "app_create_customer",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          groups = { "admin" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *      )
+ * )
+ * 
+ */
 #[ORM\Entity(repositoryClass: CustomerRepository::class)]
 class Customer implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['admin'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['admin'])]
+    #[Assert\NotBlank(message: 'Email is required')]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['admin'])]
+    #[Type(name: 'array')]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['admin'])]
+    #[Assert\NotBlank(groups: ['admin'], message: 'Password is required')]
     private ?string $password = null;
 
-    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class)]
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class, orphanRemoval: true)]
+    #[Groups(['admin'])]
     private Collection $users;
 
     public function __construct()
@@ -89,7 +158,7 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

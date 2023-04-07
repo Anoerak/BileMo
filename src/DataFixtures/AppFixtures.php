@@ -57,6 +57,7 @@ class AppFixtures extends Fixture
             $user->setUsername('user' . $i)
                 ->setEmail('user' . $i . '@example.com')
                 ->setPassword($this->encoder->hashPassword($user, 'password'))
+                ->setRoles(['ROLE_GUEST'])
                 ->setCustomer($listCustomer[array_rand($listCustomer)]);
             $manager->persist($user);
             $listUser[] = $user;
