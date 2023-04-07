@@ -19,19 +19,32 @@ Install dependencies with composer install and npm install
 Update the .env file with your database credentials
 ```
 
+```sh
+Run the command `symfony console doctrine:database:create` to create the database
+```
+
+```sh
+Run the command `symfony console doctrine:schema:update --force` to create the tables
+```
+
+```sh
+Run the command `symfony console doctrine:fixtures:load` to load the fixtures
+```
+
 ## Author
 
 👤 **Anørak**
 
-* Github: [@Anørak](https://github.com/Anørak)
+-   Github: [@Anørak](https://github.com/Anørak)
 
 ## 🤝 Contributing
 
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/Anoerak/BileMo/issues). 
+Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/Anoerak/BileMo/issues).
 
 ## Show your support
 
 Give a ⭐️ if this project helped you!
 
-***
+---
+
 _This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_
