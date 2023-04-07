@@ -6,6 +6,8 @@ use App\Repository\UserRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation\Groups;
+
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -17,25 +19,35 @@ class User implements PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['admin'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['admin', 'user'])]
     private ?string $email = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
+    #[Groups(['admin', 'user'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['admin', 'user'])]
     private ?string $username = null;
 
     #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'owner')]
+    #[Groups(['admin', 'user'])]
     private Collection $products;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
+    #[ORM\ManyToOne(inversedBy: 'users', targetEntity: Customer::class, cascade: ['persist'])]
+    #[Groups(['admin'])]
     private ?Customer $customer = null;
+
+    #[ORM\Column]
+    #[Groups(['admin', 'user'])]
+    private array $roles = [];
 
     public function __construct()
     {
@@ -74,7 +86,7 @@ class User implements PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
@@ -86,18 +98,24 @@ class User implements PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_GUEST
+        $roles[] = 'ROLE_GUEST';
 
-    // public function getPassword(): ?string
-    // {
-    //     return $this->password;
-    // }
+        return array_unique($roles);
+    }
 
-    // public function setPassword(string $password): self
-    // {
-    //     $this->password = $password;
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
-    //     return $this;
-    // }
+        return $this;
+    }
 
     /**
      * @return Collection<int, Product>
