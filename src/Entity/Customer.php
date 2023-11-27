@@ -8,7 +8,6 @@ use App\Repository\CustomerRepository;
 
 use Hateoas\Configuration\Annotation as Hateoas;
 
-use JMS\Serializer\Annotation\Since;
 use JMS\Serializer\Annotation\Groups;
 
 use Doctrine\Common\Collections\Collection;
@@ -22,29 +21,41 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @Hateoas\Relation(
- *     "get",
- *     href = @Hateoas\Route(
- *        "app_detail_customer",
- *        parameters = { "id" = "expr(object.getId())" },
- *        absolute = true
- *     ),
- *   exclusion = @Hateoas\Exclusion(
- *      groups = { "admin" },
- *      excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
- *   )
+ *      "getAll",
+ *      href = @Hateoas\Route(
+ *          "app_customer",
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          groups = { "admin" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *      )
+ * )
+ * 
+ * @Hateoas\Relation(
+ *      "get",
+ *      href = @Hateoas\Route(
+ *          "app_detail_customer",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          groups = { "admin" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *      )
  * )
  * 
  * @Hateoas\Relation(
  *      "delete",
  *      href = @Hateoas\Route(
  *         "app_delete_customer",
- *        parameters = { "id" = "expr(object.getId())" },
- *      absolute = true
- *   ),
- *  exclusion = @Hateoas\Exclusion(
- *   groups = { "admin" },
- *   excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
- *  )
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      ),
+ *      exclusion = @Hateoas\Exclusion(
+ *          groups = { "admin" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *      )
  * )
  * 
  * @Hateoas\Relation(
@@ -142,7 +153,8 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
+        // guarantee every user at least has ROLE_GUEST
+        $roles[] = 'ROLE_GUEST';
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);

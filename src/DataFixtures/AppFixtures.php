@@ -29,15 +29,15 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 20; $i++) {
             $customer = new Customer();
             $customer->setEmail('customer' . $i . '@example.com')
-                ->setRoles(['ROLE_USER'])
+                ->setRoles(['ROLE_USER', 'ROLE_GUEST'])
                 ->setPassword($this->encoder->hashPassword($customer, 'password'));
             switch ($i) {
                 case 0:
-                    $customer->setRoles(['ROLE_ADMIN'])
+                    $customer->setRoles(['ROLE_ADMIN', 'ROLE_USER', 'ROLE_GUEST'])
                         ->setEmail('admin@example.com');
                     break;
                 case 1:
-                    $customer->setRoles(['ROLE_USER'])
+                    $customer->setRoles(['ROLE_USER', 'ROLE_GUEST'])
                         ->setEmail('user@example.com');
                     break;
                 case 2:
@@ -46,7 +46,7 @@ class AppFixtures extends Fixture
                     break;
                 default:
                     // We randomly assign a role USER or GUEST to the customer
-                    $customer->setRoles(['ROLE_USER'])
+                    $customer->setRoles(['ROLE_USER', 'ROLE_GUEST'])
                         ->setEmail('customer' . $i . '@example.com');
                     break;
             }
