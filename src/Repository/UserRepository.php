@@ -13,6 +13,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method User[]    findAllWithPagination($page, $limit)
+ * @method User[]    findByOwnerWithPagination($page, $limit, $customer)
+ * 
  */
 class UserRepository extends ServiceEntityRepository
 {
@@ -42,6 +45,28 @@ class UserRepository extends ServiceEntityRepository
     public function findAllWithPagination($page, $limit)
     {
         $qb = $this->createQueryBuilder('b')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByCustomerWithPagination($page, $limit, $customer)
+    {
+        $qb = $this->createQueryBuilder('b')
+            ->andWhere('b.customer = :customer')
+            ->setParameter('customer', $customer)
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByOwnerWithPagination($page, $limit, $owner)
+    {
+        $qb = $this->createQueryBuilder('b')
+            ->andWhere('b.owner = :owner')
+            ->setParameter('owner', $owner)
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 

@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Entity\User;
-
 
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

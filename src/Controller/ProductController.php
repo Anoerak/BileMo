@@ -77,7 +77,7 @@ class ProductController extends AbstractController
         description: 'Return all products',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+            items: new OA\Items(ref: new Model(type: Product::class))
         )
     )]
     #[OA\Parameter(
@@ -94,6 +94,7 @@ class ProductController extends AbstractController
         required: false,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[Route('/api/product', name: 'app_product', methods: 'GET')]
     public function getAllProducts(Request $request, JmsSerializerInterface $jmsSerializer): JsonResponse
@@ -105,7 +106,7 @@ class ProductController extends AbstractController
 
         $jsonProductsList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
             echo ("NO_CACHE_FOR_THIS_PAGE_OF_PRODUCTS");
-            $context = SerializationContext::create()->setGroups(['guest']);
+            $context = SerializationContext::create()->setGroups(['admin', 'user', 'guest']);
             $item->tag('productCache');
             $productList = $this->productRepository->findAllWithPagination($page, $limit);
             return $jmsSerializer->serialize(
@@ -129,7 +130,7 @@ class ProductController extends AbstractController
         description: 'Return one product',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+            items: new OA\Items(ref: new Model(type: Product::class))
         )
     )]
     #[OA\Parameter(
@@ -139,13 +140,14 @@ class ProductController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[Route('/api/product/{id}', name: 'app_detail_product', methods: 'GET')]
     public function getOneProduct(Product $product, VersioningService $versioningService): JsonResponse
     {
 
         $version = $versioningService->getVersion();
-        $context = SerializationContext::create()->setGroups(['guest']);
+        $context = SerializationContext::create()->setGroups(['admin', 'user', 'guest']);
         $context->setVersion($version);
         $jsonProduct = $this->jmsSerializer->serialize($product, 'json', $context);
 
@@ -163,16 +165,17 @@ class ProductController extends AbstractController
         description: 'Create a product',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+            items: new OA\Items(ref: new Model(type: Product::class))
         )
     )]
     #[OA\RequestBody(
         description: 'Product object that needs to be added to the db',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: Product::class, groups: ['guest'])
+            ref: new Model(type: Product::class)
         )
     )]
+    #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -241,14 +244,14 @@ class ProductController extends AbstractController
         description: 'Update a product',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+            items: new OA\Items(ref: new Model(type: Product::class))
         )
     )]
     #[OA\RequestBody(
         description: 'Product object that needs to be updated to the db',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: Product::class, groups: ['guest'])
+            ref: new Model(type: Product::class)
         )
     )]
     #[OA\Parameter(
@@ -258,6 +261,7 @@ class ProductController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[Route('/api/product/{id}', name: 'app_update_product', methods: 'PUT')]
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
@@ -302,7 +306,7 @@ class ProductController extends AbstractController
         description: 'Delete a product',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class, groups: ['guest']))
+            items: new OA\Items(ref: new Model(type: Product::class))
         )
     )]
     #[OA\Parameter(
@@ -312,6 +316,7 @@ class ProductController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]

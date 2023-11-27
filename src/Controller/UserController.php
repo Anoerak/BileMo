@@ -80,7 +80,7 @@ class UserController extends AbstractController
         description: 'Return all users',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class, groups: ['user']))
+            items: new OA\Items(ref: new Model(type: User::class))
         )
     )]
     #[OA\Parameter(
@@ -97,28 +97,41 @@ class UserController extends AbstractController
         required: false,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user', name: 'app_user', methods: 'GET')]
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     public function getAllUsers(Request $request, JmsSerializerInterface $jmsSerializer): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
 
         $idCache = 'user_' . $page . '_' . $limit;
-
-        $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
-            echo ("NO_CACHE_FOR_THIS_PAGE_OF_USERS");
-            $context = SerializationContext::create()->setGroups(['user']);
-            $item->tag('userCache');
-            $userList = $this->userRepository->findAllWithPagination($page, $limit);
-            return $jmsSerializer->serialize(
-                $userList,
-                'json',
-                $context
-            );
-        });
+        if (!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
+                echo ("NO_CACHE_FOR_THIS_PAGE_OF_USERS");
+                $context = SerializationContext::create()->setGroups(['user']);
+                $item->tag('userCache');
+                $userList = $this->userRepository->findByCustomerWithPagination($page, $limit, $this->getUser());
+                return $jmsSerializer->serialize(
+                    $userList,
+                    'json',
+                    $context
+                );
+            });
+        } else {
+            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
+                echo ("NO_CACHE_FOR_THIS_PAGE_OF_USERS");
+                $context = SerializationContext::create()->setGroups(['admin', 'user']);
+                $item->tag('userCache');
+                $userList = $this->userRepository->findAllWithPagination($page, $limit);
+                return $jmsSerializer->serialize(
+                    $userList,
+                    'json',
+                    $context
+                );
+            });
+        }
 
         return new JsonResponse($jsonUserList, 200, [], true);
     }
@@ -134,7 +147,7 @@ class UserController extends AbstractController
         description: 'Return one user',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class, groups: ['user']))
+            items: new OA\Items(ref: new Model(type: User::class))
         )
     )]
     #[OA\Parameter(
@@ -144,19 +157,38 @@ class UserController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user/{id}', name: 'app_detail_user', methods: 'GET')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     public function getOneCustomer(User $user, VersioningService $versioningService): JsonResponse
     {
 
-        $version = $versioningService->getVersion();
-        $context = SerializationContext::create()->setGroups(['user']);
-        $context->setVersion($version);
-        $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
+        if (!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+            // We only return the user if he is the owner of the customer
+            if ($user->getCustomer() != $this->getUser()) {
+                return new JsonResponse(['message' => 'You are not allowed to access this resource'], Response::HTTP_FORBIDDEN);
+            }
 
-        return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+            $version = $versioningService->getVersion();
+            $context = SerializationContext::create()->setGroups(['user']);
+            $context->setVersion($version);
+            $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
+            return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+
+            // We clear the cache
+            $this->tagCache->invalidateTags(['userCache']);
+        } else {
+
+            $version = $versioningService->getVersion();
+            $context = SerializationContext::create()->setGroups(['user', 'admin']);
+            $context->setVersion($version);
+            $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
+            return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
+
+            // We clear the cache
+            $this->tagCache->invalidateTags(['userCache']);
+        }
     }
     /* #endregion */
 
@@ -170,16 +202,17 @@ class UserController extends AbstractController
         description: 'Create a user',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class, groups: ['user']))
+            items: new OA\Items(ref: new Model(type: User::class))
         )
     )]
     #[OA\RequestBody(
         description: 'User object that needs to be added to the store',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: User::class, groups: ['user'])
+            ref: new Model(type: User::class)
         )
     )]
+    #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user', name: 'app_create_user', methods: 'POST')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -234,7 +267,6 @@ class UserController extends AbstractController
         if ($products != null) {
             foreach ($products as $product) {
                 $product = $this->em->getRepository(Product::class)->findBy(['id' => $product]);
-                dump($this->em->getRepository(Product::class)->findBy(['id' => $product]));
                 $user->addProduct($product[0]);
             }
         }
@@ -272,14 +304,14 @@ class UserController extends AbstractController
         description: 'Update a user',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class, groups: ['user']))
+            items: new OA\Items(ref: new Model(type: User::class))
         )
     )]
     #[OA\RequestBody(
         description: 'User object that needs to be updated to the store',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: User::class, groups: ['user'])
+            ref: new Model(type: User::class)
         )
     )]
     #[OA\Parameter(
@@ -289,6 +321,7 @@ class UserController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user/{id}', name: 'app_update_user', methods: 'PUT')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -332,7 +365,7 @@ class UserController extends AbstractController
         description: 'Delete a user',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class, groups: ['user']))
+            items: new OA\Items(ref: new Model(type: User::class))
         )
     )]
     #[OA\Parameter(
@@ -342,6 +375,7 @@ class UserController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user/{id}', name: 'app_delete_user', methods: 'DELETE')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]

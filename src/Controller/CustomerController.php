@@ -79,7 +79,7 @@ class CustomerController extends AbstractController
         description: 'Return all customers',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class, groups: ['admin']))
+            items: new OA\Items(ref: new Model(type: Customer::class)),
         )
     )]
     #[OA\Parameter(
@@ -96,6 +96,7 @@ class CustomerController extends AbstractController
         required: false,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Customer')]
     /* #endregion */
     #[Route('/api/customer', name: 'app_customer', methods: 'GET')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -115,7 +116,6 @@ class CustomerController extends AbstractController
                 $customerList,
                 'json',
                 $context
-                // ['groups' => 'admin']
             );
         });
 
@@ -133,7 +133,7 @@ class CustomerController extends AbstractController
         description: 'Return one customer',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class, groups: ['admin']))
+            items: new OA\Items(ref: new Model(type: Customer::class))
         )
     )]
     #[OA\Parameter(
@@ -143,12 +143,12 @@ class CustomerController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Customer')]
     /* #endregion */
     #[Route('/api/customer/{id}', name: 'app_detail_customer', methods: 'GET')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     public function getOneCustomer(Customer $customer, VersioningService $versioningService): JsonResponse
     {
-
         $version = $versioningService->getVersion();
         $context = SerializationContext::create()->setGroups(['admin']);
         $context->setVersion($version);
@@ -168,16 +168,17 @@ class CustomerController extends AbstractController
         description: 'Create a customer',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class, groups: ['admin']))
+            items: new OA\Items(ref: new Model(type: Customer::class))
         )
     )]
     #[OA\RequestBody(
         description: 'Customer object that needs to be added to the store',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: Customer::class, groups: ['admin'])
+            ref: new Model(type: Customer::class)
         )
     )]
+    #[OA\Tag(name: 'Customer')]
     /* #endregion */
     #[Route('/api/customer', name: 'app_create_customer', methods: 'POST')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -215,7 +216,9 @@ class CustomerController extends AbstractController
         if ($users != null) {
             foreach ($users as $user) {
                 $user = $this->em->getRepository(User::class)->findBy(['id' => $user]);
-                $customer->addUser($user[0]);
+                if ($user != null) {
+                    $customer->addUser($user[0]);
+                }
             }
         }
 
@@ -252,14 +255,14 @@ class CustomerController extends AbstractController
         description: 'Update a customer',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class, groups: ['customer:edit']))
+            items: new OA\Items(ref: new Model(type: Customer::class))
         )
     )]
     #[OA\RequestBody(
         description: 'Customer object that needs to be updated to the store',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: Customer::class, groups: ['customer:edit'])
+            ref: new Model(type: Customer::class)
         )
     )]
     #[OA\Parameter(
@@ -269,6 +272,7 @@ class CustomerController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
+    #[OA\Tag(name: 'Customer')]
     /* #endregion */
     #[Route('/api/customer/{id}', name: 'app_update_customer', methods: 'PUT')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
@@ -276,7 +280,7 @@ class CustomerController extends AbstractController
     {
         $newCustomer = $this->serializerInterface->deserialize($request->getContent(), Customer::class, 'json');
 
-        // We go through the new customer's properties and check if there is something to update
+        // For each property of the new customer, we check if there is something to update
         $this->updateEntity->update($customer, $newCustomer, $request);
 
         // We check if there are errors
@@ -309,7 +313,7 @@ class CustomerController extends AbstractController
         description: 'Delete a customer',
         content: new OA\JsonContent(
             type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class, groups: ['admin']))
+            items: new OA\Items(ref: new Model(type: Customer::class))
         )
     )]
     #[OA\Parameter(
@@ -319,7 +323,7 @@ class CustomerController extends AbstractController
         required: true,
         schema: new OA\Schema(type: 'integer')
     )]
-
+    #[OA\Tag(name: 'Customer')]
     /* #endregion */    #[Route('/api/customer/{id}', name: 'app_delete_customer', methods: 'DELETE')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     public function deleteCustomer(Customer $customer): JsonResponse

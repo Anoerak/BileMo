@@ -25,7 +25,7 @@ Run the command `symfony console doctrine:database:create` to create the databas
 ```
 
 ```sh
-Run the command `symfony console doctrine:schema:update --force` to create the tables
+Run the command `symfony console doctrine:schema:update --force --complete` to create the tables
 ```
 
 ```sh

@@ -16,6 +16,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @method Customer|null findOneBy(array $criteria, array $orderBy = null)
  * @method Customer[]    findAll()
  * @method Customer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Customer[]    findAllWithPagination($page, $limit)
  */
 class CustomerRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {

@@ -13,6 +13,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Product|null findOneBy(array $criteria, array $orderBy = null)
  * @method Product[]    findAll()
  * @method Product[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Product[]    findAllWithPagination($page, $limit)
+ * @method Product[]    findByCustomerWithPagination($page, $limit, $customer)
+ * 
  */
 class ProductRepository extends ServiceEntityRepository
 {

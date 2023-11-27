@@ -22,7 +22,7 @@ class User implements PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['admin'])]
+    #[Groups(['user'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -45,7 +45,7 @@ class User implements PasswordAuthenticatedUserInterface
     private Collection $products;
 
     #[ORM\ManyToOne(inversedBy: 'users', targetEntity: Customer::class, cascade: ['persist'])]
-    #[Groups(['admin'])]
+    #[Groups(['admin', 'user'])]
     private ?Customer $customer = null;
 
     #[ORM\Column]

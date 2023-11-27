@@ -26,7 +26,7 @@ class AppFixtures extends Fixture
         /**
          * We use a loop to create 3 new customers, one admin, one user and one guest
          */
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $customer = new Customer();
             $customer->setEmail('customer' . $i . '@example.com')
                 ->setRoles(['ROLE_USER'])
@@ -44,6 +44,11 @@ class AppFixtures extends Fixture
                     $customer->setRoles(['ROLE_GUEST'])
                         ->setEmail('guest@example.com');
                     break;
+                default:
+                    // We randomly assign a role USER or GUEST to the customer
+                    $customer->setRoles(['ROLE_USER'])
+                        ->setEmail('customer' . $i . '@example.com');
+                    break;
             }
             $manager->persist($customer);
             $listCustomer[] = $customer;
@@ -52,7 +57,7 @@ class AppFixtures extends Fixture
         /**
          * We use a loop to create 10 new users, randomly affected to a customer
          */
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             $user = new User();
             $user->setUsername('user' . $i)
                 ->setEmail('user' . $i . '@example.com')

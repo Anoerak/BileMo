@@ -34,7 +34,7 @@ class UpdateEntitiesService
 				if ($data->getPassword() !== null && $entity->getPassword() !== $data->getPassword()) {
 					$entity->setPassword($this->encoder->hashPassword($entity, $data->getPassword()));
 				}
-				if ($data->getRoles() !== null && $entity->getRoles() !== $data->getRoles()) {
+				if ($data->getRoles() !== null) {
 					$entity->setRoles($data->getRoles());
 				}
 				// We get the arrays from the request
