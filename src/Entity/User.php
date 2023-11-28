@@ -2,16 +2,17 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-
 use Doctrine\ORM\Mapping as ORM;
 
-use Hateoas\Configuration\Annotation as Hateoas;
+use App\Repository\UserRepository;
+
+use JMS\Serializer\Annotation\Since;
 
 use JMS\Serializer\Annotation\Groups;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Hateoas\Configuration\Annotation as Hateoas;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 
@@ -88,33 +89,40 @@ class User implements PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['user'])]
+    #[Since('1.0')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private ?string $email = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private ?string $username = null;
 
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'owner')]
-    #[Groups(['admin', 'user'])]
+    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'user')]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private Collection $products;
 
     #[ORM\ManyToOne(inversedBy: 'users', targetEntity: Customer::class, cascade: ['persist'])]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private ?Customer $customer = null;
 
     #[ORM\Column]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['user'])]
+    #[Since('1.0')]
     private array $roles = [];
 
     public function __construct()
@@ -197,7 +205,7 @@ class User implements PasswordAuthenticatedUserInterface
     {
         if (!$this->products->contains($product)) {
             $this->products->add($product);
-            $product->addOwner($this);
+            $product->addUser($this);
         }
 
         return $this;
@@ -206,7 +214,7 @@ class User implements PasswordAuthenticatedUserInterface
     public function removeProduct(Product $product): self
     {
         if ($this->products->removeElement($product)) {
-            $product->removeOwner($this);
+            $product->removeUser($this);
         }
 
         return $this;

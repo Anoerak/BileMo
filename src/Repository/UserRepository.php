@@ -16,7 +16,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  * @method User[]    findAllWithPagination($page, $limit)
- * @method User[]    findByOwnerWithPagination($page, $limit, $customer)
+ * @method User[]    findByUserWithPagination($page, $limit, $customer)
  * 
  */
 class UserRepository extends ServiceEntityRepository
@@ -64,11 +64,11 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByOwnerWithPagination(int $page, int $limit, User $owner): array
+    public function findByUserWithPagination(int $page, int $limit, User $user): array
     {
         $qb = $this->createQueryBuilder('b')
-            ->andWhere('b.owner = :owner')
-            ->setParameter('owner', $owner)
+            ->andWhere('b.user = :user')
+            ->setParameter('user', $user)
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 

@@ -101,16 +101,18 @@ class UserController extends AbstractController
     /* #endregion */
     #[Route('/api/user', name: 'app_user', methods: 'GET')]
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
-    public function getAllUsers(Request $request, JmsSerializerInterface $jmsSerializer): JsonResponse
+    public function getAllUsers(Request $request, JmsSerializerInterface $jmsSerializer, VersioningService $versioningService): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $version = $versioningService->getVersion();
 
         $idCache = 'user_' . $page . '_' . $limit;
         if (!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
-            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
+            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer, $version) {
                 echo ("NO_CACHE_FOR_THIS_PAGE_OF_USERS");
-                $context = SerializationContext::create()->setGroups(['user']);
+                $context = SerializationContext::create()->setGroups(['user', 'product']);
+                $context->setVersion($version);
                 $item->tag('userCache');
                 $userList = $this->userRepository->findByCustomerWithPagination($page, $limit, $this->getUser());
                 return $jmsSerializer->serialize(
@@ -120,9 +122,10 @@ class UserController extends AbstractController
                 );
             });
         } else {
-            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
+            $jsonUserList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer, $version) {
                 echo ("NO_CACHE_FOR_THIS_PAGE_OF_USERS");
-                $context = SerializationContext::create()->setGroups(['admin', 'user']);
+                $context = SerializationContext::create()->setGroups(['customer', 'user', 'product']);
+                $context->setVersion($version);
                 $item->tag('userCache');
                 $userList = $this->userRepository->findAllWithPagination($page, $limit);
                 return $jmsSerializer->serialize(
@@ -165,13 +168,13 @@ class UserController extends AbstractController
     {
 
         if (!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
-            // We only return the user if he is the owner of the customer
+            // We only return the user if he is the user of the customer
             if ($user->getCustomer() != $this->getUser()) {
                 return new JsonResponse(['message' => 'You are not allowed to access this resource'], Response::HTTP_FORBIDDEN);
             }
 
             $version = $versioningService->getVersion();
-            $context = SerializationContext::create()->setGroups(['user']);
+            $context = SerializationContext::create()->setGroups(['user', 'product']);
             $context->setVersion($version);
             $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
             return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);
@@ -181,7 +184,7 @@ class UserController extends AbstractController
         } else {
 
             $version = $versioningService->getVersion();
-            $context = SerializationContext::create()->setGroups(['user', 'admin']);
+            $context = SerializationContext::create()->setGroups(['customer', 'user', 'product']);
             $context->setVersion($version);
             $jsonUser = $this->jmsSerializer->serialize($user, 'json', $context);
             return new JsonResponse($jsonUser, Response::HTTP_OK, [], true);

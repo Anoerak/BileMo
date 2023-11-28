@@ -4,15 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use App\Repository\CustomerRepository;
+use JMS\Serializer\Annotation\Type;
 
-use Hateoas\Configuration\Annotation as Hateoas;
+use JMS\Serializer\Annotation\Since;
 
 use JMS\Serializer\Annotation\Groups;
 
+use App\Repository\CustomerRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
-use JMS\Serializer\Annotation\Type;
+use Hateoas\Configuration\Annotation as Hateoas;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -90,16 +91,19 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['admin', 'user'])]
+    #[Groups(['customer'])]
+    #[Since("1.0")]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['admin'])]
+    #[Groups(['customer'])]
+    #[Since("1.0")]
     #[Assert\NotBlank(message: 'Email is required')]
     private ?string $email = null;
 
     #[ORM\Column]
-    #[Groups(['admin'])]
+    #[Groups(['customer'])]
+    #[Since("1.0")]
     #[Type(name: 'array')]
     private array $roles = [];
 
@@ -107,12 +111,14 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Groups(['admin'])]
+    #[Groups(['customer'])]
+    #[Since("1.0")]
     #[Assert\NotBlank(groups: ['admin'], message: 'Password is required')]
     private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: User::class, orphanRemoval: true)]
-    #[Groups(['admin'])]
+    #[Groups(['customer'])]
+    #[Since("1.0")]
     private Collection $users;
 
     public function __construct()

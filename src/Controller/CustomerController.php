@@ -99,16 +99,18 @@ class CustomerController extends AbstractController
     /* #endregion */
     #[Route('/api/customer', name: 'app_customer', methods: 'GET')]
     #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
-    public function getAllCustomers(Request $request, JmsSerializerInterface $jmsSerializer): JsonResponse
+    public function getAllCustomers(Request $request, JmsSerializerInterface $jmsSerializer, VersioningService $versioningService): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $version = $versioningService->getVersion();
+        $context = SerializationContext::create()->setGroups(['customer', 'user', 'product']);
+        $context->setVersion($version);
 
         $idCache = 'customer_' . $page . '_' . $limit;
 
-        $jsonCustomerList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
+        $jsonCustomerList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer, $context) {
             echo ("NO_CACHE_FOR_THIS_PAGE_OF_CUSTOMERS");
-            $context = SerializationContext::create()->setGroups(['admin']);
             $item->tag('customerCache');
             $customerList = $this->customerRepository->findAllWithPagination($page, $limit);
             return $jmsSerializer->serialize(
@@ -149,7 +151,7 @@ class CustomerController extends AbstractController
     public function getOneCustomer(Customer $customer, VersioningService $versioningService): JsonResponse
     {
         $version = $versioningService->getVersion();
-        $context = SerializationContext::create()->setGroups(['admin']);
+        $context = SerializationContext::create()->setGroups(['customer', 'user', 'product']);
         $context->setVersion($version);
         $jsonCustomer = $this->jmsSerializer->serialize($customer, 'json', $context);
 
