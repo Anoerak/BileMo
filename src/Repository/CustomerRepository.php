@@ -57,7 +57,7 @@ class CustomerRepository extends ServiceEntityRepository implements PasswordUpgr
         $this->save($user, true);
     }
 
-    public function findAllWithPagination($page, $limit)
+    public function findAllWithPagination(int $page, int $limit): array
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
@@ -65,29 +65,4 @@ class CustomerRepository extends ServiceEntityRepository implements PasswordUpgr
 
         return $qb->getQuery()->getResult();
     }
-
-    //    /**
-    //     * @return Customer[] Returns an array of Customer objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Customer
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

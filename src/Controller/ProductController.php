@@ -200,7 +200,7 @@ class ProductController extends AbstractController
         -----------------------------------*/
         $context = $request->toArray();
         $userList = isset($context['owner']) ? $context['owner'] : null;
-        if ($userList != null) {
+        if ($userList !== null) {
             $product->getOwner()->clear();
             foreach ($userList as $userId) {
                 $user = $this->em->getRepository(User::class)->findBy(['id' => $userId]);

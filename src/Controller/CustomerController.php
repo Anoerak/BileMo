@@ -213,10 +213,10 @@ class CustomerController extends AbstractController
         // We check if there are Users affected to this new Customer
         $users = isset($context['users']) ? $context['users'] : null;
         // We loop the array to get the User based on his id and add it to the Customer's Users collection.
-        if ($users != null) {
+        if ($users !== null) {
             foreach ($users as $user) {
                 $user = $this->em->getRepository(User::class)->findBy(['id' => $user]);
-                if ($user != null) {
+                if ($user !== null) {
                     $customer->addUser($user[0]);
                 }
             }

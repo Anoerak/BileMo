@@ -36,7 +36,6 @@ class VersioningService
 			if (strpos($value, 'version') !== false) {
 				$version = explode('=', $value);
 				$version = $version[1];
-				// break;
 			} else {
 				$version = $this->defaultVersion;
 			}
