@@ -264,7 +264,7 @@ class UserController extends AbstractController
         // We check if there are Products affected to this new User
         $products = isset($context['products']) ? $context['products'] : null;
         // We loop the array to get the Product based on his id and add it to the User's Products collection.
-        if ($products != null) {
+        if ($products !== null) {
             foreach ($products as $product) {
                 $product = $this->em->getRepository(Product::class)->findBy(['id' => $product]);
                 $user->addProduct($product[0]);

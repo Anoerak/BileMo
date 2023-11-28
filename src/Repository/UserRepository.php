@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -42,7 +43,7 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllWithPagination($page, $limit)
+    public function findAllWithPagination(int $page, int $limit)
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
@@ -51,7 +52,7 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByCustomerWithPagination($page, $limit, $customer)
+    public function findByCustomerWithPagination(int $page, int $limit, $customer): array
     {
         $qb = $this->createQueryBuilder('b')
             ->andWhere('b.customer = :customer')
@@ -62,7 +63,7 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByOwnerWithPagination($page, $limit, $owner)
+    public function findByOwnerWithPagination(int $page, int $limit, $owner): array
     {
         $qb = $this->createQueryBuilder('b')
             ->andWhere('b.owner = :owner')
@@ -72,29 +73,4 @@ class UserRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

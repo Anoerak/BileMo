@@ -12,13 +12,15 @@ class PaginationService extends ServiceEntityRepository
 	private $entity;
 	private $registry;
 
-	public function __construct(ManagerRegistry $registry)
+	public function __construct(ManagerRegistry $registry): void
 	{
 		$this->registry = $registry;
 	}
 
-	public function initManagerRegistry($registry, $entity)
-	{
+	public function initManagerRegistry(
+		$registry,
+		$entity
+	): void {
 		parent::__construct($registry, $entity);
 	}
 
@@ -27,12 +29,12 @@ class PaginationService extends ServiceEntityRepository
 		$this->entity = $entity;
 	}
 
-	public function getEntityName()
+	public function getEntityName(): string
 	{
 		return $this->entity . '::class';
 	}
 
-	public function findAllWithPagination($page, $limit)
+	public function findAllWithPagination($page, $limit): array
 	{
 		$this->initManagerRegistry($this->registry, $this->getEntityName());
 
