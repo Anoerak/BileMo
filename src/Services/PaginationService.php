@@ -12,7 +12,7 @@ class PaginationService extends ServiceEntityRepository
 	private $entity;
 	private $registry;
 
-	public function __construct(ManagerRegistry $registry): void
+	public function __construct(ManagerRegistry $registry)
 	{
 		$this->registry = $registry;
 	}

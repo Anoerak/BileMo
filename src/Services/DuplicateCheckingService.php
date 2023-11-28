@@ -10,19 +10,18 @@ class DuplicateCheckingService
 {
 	private $entityManager;
 
-	public function __construct(EntityManagerInterface $entityManager): void
+	public function __construct(EntityManagerInterface $entityManager)
 	{
 		$this->entityManager = $entityManager;
 	}
 
-	public function checkForExistingEntry(
-		string $entity,
-		string $field,
-		string $value
-	): ?JsonResponse {
+	public function checkForExistingEntry(string $entity, string $field, string $value): ?JsonResponse
+	{
 		$entityExist = $this->entityManager->getRepository($entity)->findOneBy([$field => $value]);
 		if ($entityExist) {
 			return new JsonResponse(['message' => 'This ' . $field . ' is already used'], Response::HTTP_BAD_REQUEST);
+		} else {
+			return null;
 		}
 	}
 }
