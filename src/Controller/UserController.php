@@ -209,7 +209,18 @@ class UserController extends AbstractController
         description: 'User object that needs to be added to the store',
         required: true,
         content: new OA\JsonContent(
-            ref: new Model(type: User::class)
+            ref: new Model(
+                type: User::class
+            ),
+            title: 'New user',
+            description: 'Replace the customer and the products values by real values',
+            example: [
+                'email' => 'email',
+                'password' => 'password',
+                'username' => 'username',
+                'customer' => [1],
+                'products' => [1, 2]
+            ]
         )
     )]
     #[OA\Tag(name: 'User')]
@@ -311,6 +322,15 @@ class UserController extends AbstractController
         description: 'User object that needs to be updated to the store',
         required: true,
         content: new OA\JsonContent(
+            title: 'Updated user',
+            description: 'Replace the customer and the products values by real values',
+            example: [
+                'email' => 'email',
+                'password' => 'password',
+                'username' => 'username',
+                'customer' => [1],
+                'products' => [1, 2]
+            ],
             ref: new Model(type: User::class)
         )
     )]

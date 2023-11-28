@@ -19,7 +19,6 @@ use App\Services\ErrorValidator;
 
 use App\Services\VersioningService;
 use App\Repository\ProductRepository;
-
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -172,6 +171,14 @@ class ProductController extends AbstractController
         description: 'Product object that needs to be added to the db',
         required: true,
         content: new OA\JsonContent(
+            title: 'Create a new Product',
+            description: 'Replace the example values by the values you want, especially the owner array (using real values).',
+            example: [
+                'name' => 'Product 1',
+                'description' => 'Description of product 1',
+                'price' => "10.99",
+                'owner' => [1, 2]
+            ],
             ref: new Model(type: Product::class)
         )
     )]
@@ -251,6 +258,14 @@ class ProductController extends AbstractController
         description: 'Product object that needs to be updated to the db',
         required: true,
         content: new OA\JsonContent(
+            title: 'Update a Product',
+            description: 'Replace the example values by the values you want, especially the owner array (using real values).',
+            example: [
+                'name' => 'Product 1',
+                'description' => 'Description of product 1',
+                'price' => "10.99",
+                'owner' => [1, 2]
+            ],
             ref: new Model(type: Product::class)
         )
     )]

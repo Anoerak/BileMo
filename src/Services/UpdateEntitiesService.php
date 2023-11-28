@@ -16,13 +16,13 @@ class UpdateEntitiesService
 	private $em;
 	private $encoder;
 
-	public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $encoder): void
+	public function __construct(EntityManagerInterface $em, UserPasswordHasherInterface $encoder)
 	{
 		$this->em = $em;
 		$this->encoder = $encoder;
 	}
 
-	public function update($entity, $data, $request): void
+	public function update($entity, $data, $request)
 	{
 		switch (get_class($entity)) {
 				/* #region Customer Entity */

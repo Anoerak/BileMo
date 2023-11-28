@@ -20,7 +20,6 @@ use App\Services\DuplicateCheckingService;
 
 use JMS\Serializer\SerializationContext;
 use JMS\Serializer\SerializerInterface as JmsSerializerInterface;
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -175,6 +174,14 @@ class CustomerController extends AbstractController
         description: 'Customer object that needs to be added to the store',
         required: true,
         content: new OA\JsonContent(
+            title: 'Create a Customer',
+            description: 'Replace the "users" values with the id of the users you want to add to the customer',
+            example: [
+                'name' => 'John Doe',
+                'email' => 'johndoa@lost.com',
+                'password' => 'password',
+                'users' => [1, 2]
+            ],
             ref: new Model(type: Customer::class)
         )
     )]
@@ -262,6 +269,14 @@ class CustomerController extends AbstractController
         description: 'Customer object that needs to be updated to the store',
         required: true,
         content: new OA\JsonContent(
+            title: 'Modify a Customer',
+            description: 'Replace the "users" values with the id of the users you want to add to the customer',
+            example: [
+                'name' => 'John Wayne',
+                'email' => 'johnwayne@farwest.com',
+                'password' => 'password',
+                'users' => [1, 2]
+            ],
             ref: new Model(type: Customer::class)
         )
     )]
