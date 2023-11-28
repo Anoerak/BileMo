@@ -96,24 +96,43 @@ class ProductController extends AbstractController
     #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[Route('/api/product', name: 'app_product', methods: 'GET')]
-    public function getAllProducts(Request $request, JmsSerializerInterface $jmsSerializer): JsonResponse
+    public function getAllProducts(Request $request, JmsSerializerInterface $jmsSerializer, VersioningService $versioningService): JsonResponse
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
 
         $idCache = 'product_' . $page . '_' . $limit;
+        $version = $versioningService->getVersion();
 
-        $jsonProductsList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer) {
-            echo ("NO_CACHE_FOR_THIS_PAGE_OF_PRODUCTS");
-            $context = SerializationContext::create()->setGroups(['admin', 'user', 'guest']);
-            $item->tag('productCache');
-            $productList = $this->productRepository->findAllWithPagination($page, $limit);
-            return $jmsSerializer->serialize(
-                $productList,
-                'json',
-                $context
-            );
-        });
+        if (!in_array('ROLE_ADMIN', $this->getUser()->getRoles())) {
+            $jsonProductsList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer, $version) {
+                echo ("NO_CACHE_FOR_THIS_PAGE_OF_PRODUCTS");
+                $context = SerializationContext::create()->setGroups(['product', 'getComments']);
+                $context->setVersion($version);
+                $item->tag('productCache');
+                $productList = $this->productRepository->findAllWithPagination($page, $limit);
+                return $jmsSerializer->serialize(
+                    $productList,
+                    'json',
+                    $context
+                );
+            });
+        } else {
+            $jsonProductsList = $this->tagCache->get($idCache, function (ItemInterface $item) use ($page, $limit, $jmsSerializer, $version) {
+                echo ("NO_CACHE_FOR_THIS_PAGE_OF_PRODUCTS");
+                $context = SerializationContext::create()->setGroups(['customer', 'user', 'product', 'getComments']);
+                $context->setVersion($version);
+                $item->tag('productCache');
+                $productList = $this->productRepository->findAllWithPagination($page, $limit);
+                return $jmsSerializer->serialize(
+                    $productList,
+                    'json',
+                    $context
+                );
+            });
+        }
+
+
 
         return new JsonResponse($jsonProductsList, 200, [], true);
     }
@@ -144,9 +163,9 @@ class ProductController extends AbstractController
     #[Route('/api/product/{id}', name: 'app_detail_product', methods: 'GET')]
     public function getOneProduct(Product $product, VersioningService $versioningService): JsonResponse
     {
-
+        echo ("NO_CACHE_FOR_THIS_PAGE_OF_PRODUCTS");
         $version = $versioningService->getVersion();
-        $context = SerializationContext::create()->setGroups(['admin', 'user', 'guest']);
+        $context = SerializationContext::create()->setGroups(['product', 'getComments']);
         $context->setVersion($version);
         $jsonProduct = $this->jmsSerializer->serialize($product, 'json', $context);
 
@@ -172,12 +191,12 @@ class ProductController extends AbstractController
         required: true,
         content: new OA\JsonContent(
             title: 'Create a new Product',
-            description: 'Replace the example values by the values you want, especially the owner array (using real values).',
+            description: 'Replace the example values by the values you want, especially the user array (using real values).',
             example: [
                 'name' => 'Product 1',
                 'description' => 'Description of product 1',
                 'price' => "10.99",
-                'owner' => [1, 2]
+                'user' => [1, 2]
             ],
             ref: new Model(type: Product::class)
         )
@@ -206,15 +225,15 @@ class ProductController extends AbstractController
         | We affect this product to user from the array if not empty
         -----------------------------------*/
         $context = $request->toArray();
-        $userList = isset($context['owner']) ? $context['owner'] : null;
+        $userList = isset($context['user']) ? $context['user'] : null;
         if ($userList !== null) {
-            $product->getOwner()->clear();
+            $product->getUser()->clear();
             foreach ($userList as $userId) {
                 $user = $this->em->getRepository(User::class)->findBy(['id' => $userId]);
                 if (!$user) {
                     return new JsonResponse(['message' => 'This user does not exist'], Response::HTTP_BAD_REQUEST);
                 }
-                $product->addOwner($user[0]);
+                $product->addUser($user[0]);
             }
         }
 
@@ -259,12 +278,12 @@ class ProductController extends AbstractController
         required: true,
         content: new OA\JsonContent(
             title: 'Update a Product',
-            description: 'Replace the example values by the values you want, especially the owner array (using real values).',
+            description: 'Replace the example values by the values you want, especially the user array (using real values).',
             example: [
                 'name' => 'Product 1',
                 'description' => 'Description of product 1',
                 'price' => "10.99",
-                'owner' => [1, 2]
+                'user' => [1, 2]
             ],
             ref: new Model(type: Product::class)
         )

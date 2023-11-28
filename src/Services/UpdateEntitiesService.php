@@ -99,13 +99,13 @@ class UpdateEntitiesService
 				}
 				// We get the arrays from the request
 				$context = $request->toArray();
-				if (isset($context['owner'])) {
-					foreach ($context['owner'] as $ownerId) {
-						$owner = $this->em->getRepository(User::class)->findBy(['id' => $ownerId]);
-						if (!$owner) {
+				if (isset($context['user'])) {
+					foreach ($context['user'] as $userId) {
+						$user = $this->em->getRepository(User::class)->findBy(['id' => $userId]);
+						if (!$user) {
 							return new JsonResponse(['message' => 'This user does not exist'], Response::HTTP_BAD_REQUEST);
 						}
-						$entity->addOwner($owner[0]);
+						$entity->addUser($user[0]);
 					}
 				}
 				break;

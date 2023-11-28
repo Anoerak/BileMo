@@ -2,18 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductRepository;
-
-use Hateoas\Configuration\Annotation as Hateoas;
-
 use Doctrine\DBAL\Types\Types;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use JMS\Serializer\Annotation\Since;
+
+use App\Repository\ProductRepository;
+
 use JMS\Serializer\Annotation\Groups;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @Hateoas\Relation(
@@ -86,28 +87,38 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['admin', 'user', 'guest'])]
+    #[Groups(['product'])]
+    #[Since("1.0")]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['admin', 'user', 'guest'])]
+    #[Groups(['product'])]
+    #[Since("1.0")]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['admin', 'user', 'guest'])]
+    #[Groups(['product'])]
+    #[Since("1.0")]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['admin', 'user', 'guest'])]
+    #[Groups(['product'])]
+    #[Since("1.0")]
     private ?string $price = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'products', cascade: ['persist'])]
-    #[Groups(['admin', 'user'])]
-    private Collection $owner;
+    #[Groups(['product'])]
+    #[Since("1.0")]
+    private Collection $user;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['getComments'])]
+    #[Since("2.0")]
+    private ?string $comments = null;
 
     public function __construct()
     {
-        $this->owner = new ArrayCollection();
+        $this->user = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -154,23 +165,35 @@ class Product
     /**
      * @return Collection<int, User>
      */
-    public function getOwner(): Collection
+    public function getuser(): Collection
     {
-        return $this->owner;
+        return $this->user;
     }
 
-    public function addOwner(User $owner): self
+    public function adduser(User $user): self
     {
-        if (!$this->owner->contains($owner)) {
-            $this->owner->add($owner);
+        if (!$this->user->contains($user)) {
+            $this->user->add($user);
         }
 
         return $this;
     }
 
-    public function removeOwner(User $owner): self
+    public function removeuser(User $user): self
     {
-        $this->owner->removeElement($owner);
+        $this->user->removeElement($user);
+
+        return $this;
+    }
+
+    public function getComments(): ?string
+    {
+        return $this->comments;
+    }
+
+    public function setComments(?string $comments): static
+    {
+        $this->comments = $comments;
 
         return $this;
     }

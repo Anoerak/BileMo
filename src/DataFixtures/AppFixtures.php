@@ -76,7 +76,8 @@ class AppFixtures extends Fixture
             $product->setName('Product ' . $i)
                 ->setPrice(rand(1, 1000))
                 ->setDescription('Description of product ' . $i)
-                ->addOwner($listUser[array_rand($listUser)]);
+                ->setComments('Comments of product ' . $i)
+                ->addUser($listUser[array_rand($listUser)]);
             $manager->persist($product);
         }
 
