@@ -5,7 +5,7 @@ namespace App\Services;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-
+use Doctrine\ORM\Mapping\Entity;
 
 class PaginationService extends ServiceEntityRepository
 {
@@ -18,13 +18,13 @@ class PaginationService extends ServiceEntityRepository
 	}
 
 	public function initManagerRegistry(
-		$registry,
-		$entity
+		ManagerRegistry $registry,
+		string $entity
 	): void {
 		parent::__construct($registry, $entity);
 	}
 
-	public function setEntityName($entity)
+	public function setEntityName(string $entity): void
 	{
 		$this->entity = $entity;
 	}
@@ -34,7 +34,7 @@ class PaginationService extends ServiceEntityRepository
 		return $this->entity . '::class';
 	}
 
-	public function findAllWithPagination($page, $limit): array
+	public function findAllWithPagination(int $page, int $limit): array
 	{
 		$this->initManagerRegistry($this->registry, $this->getEntityName());
 

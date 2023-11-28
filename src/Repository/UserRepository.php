@@ -3,9 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\Customer;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -43,7 +44,7 @@ class UserRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAllWithPagination(int $page, int $limit)
+    public function findAllWithPagination(int $page, int $limit): array
     {
         $qb = $this->createQueryBuilder('b')
             ->setFirstResult(($page - 1) * $limit)
@@ -52,7 +53,7 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByCustomerWithPagination(int $page, int $limit, $customer): array
+    public function findByCustomerWithPagination(int $page, int $limit, Customer $customer): array
     {
         $qb = $this->createQueryBuilder('b')
             ->andWhere('b.customer = :customer')
@@ -63,7 +64,7 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByOwnerWithPagination(int $page, int $limit, $owner): array
+    public function findByOwnerWithPagination(int $page, int $limit, User $owner): array
     {
         $qb = $this->createQueryBuilder('b')
             ->andWhere('b.owner = :owner')

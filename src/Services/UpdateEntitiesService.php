@@ -22,7 +22,7 @@ class UpdateEntitiesService
 		$this->encoder = $encoder;
 	}
 
-	public function update($entity, $data, $request)
+	public function update(object $entity, object $data, object $request): ?JsonResponse
 	{
 		switch (get_class($entity)) {
 				/* #region Customer Entity */
