@@ -21,9 +21,9 @@ class ErrorValidator
 
 	/**
 	 * @param $errors
-	 * @return array
+	 * @return JsonResponse
 	 */
-	public function getErrors($object): JsonResponse
+	public function getErrors(Object $object): JsonResponse
 	{
 		/*----------------------------------
 		| We check if there are any errors
