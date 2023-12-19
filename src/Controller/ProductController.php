@@ -73,10 +73,38 @@ class ProductController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return all products',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Product::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'No products found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -145,10 +173,38 @@ class ProductController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return one product',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Product::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'No product found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -179,11 +235,39 @@ class ProductController extends AbstractController
      */
     /* #region Doc */
     #[OA\Response(
-        response: 201,
-        description: 'Create a product',
+        response: 200,
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Product::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -204,7 +288,6 @@ class ProductController extends AbstractController
     #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     #[Route('/api/product', name: 'app_create_product', methods: 'POST')]
     public function createProduct(Request $request): JsonResponse
     {
@@ -251,7 +334,7 @@ class ProductController extends AbstractController
         /*----------------------------------
         | We prepare the response
         -----------------------------------*/
-        $context = SerializationContext::create()->setGroups(['guest']);
+        $context = SerializationContext::create()->setGroups(['product', 'guest']);
         $jsonProduct = $this->jmsSerializer->serialize($product, 'json', $context);
 
         $location = $this->router->generate('app_detail_product', ['id' => $product->getId()]);
@@ -267,10 +350,38 @@ class ProductController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Update a product',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Product::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, modification not saved'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -299,7 +410,6 @@ class ProductController extends AbstractController
     /* #endregion */
     #[Route('/api/product/{id}', name: 'app_update_product', methods: 'PUT')]
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     public function updateProduct(Product $product, Request $request): JsonResponse
     {
 
@@ -318,15 +428,15 @@ class ProductController extends AbstractController
         $this->em->flush();
 
         // We prepare the Response
-        $context = SerializationContext::create()->setGroups(['guest']);
+        $context = SerializationContext::create()->setGroups(['product', 'guest']);
         $jsonProduct = $this->jmsSerializer->serialize($product, 'json', $context);
 
         $location = $this->router->generate('app_detail_product', ['id' => $product->getId()]);
 
-        return new JsonResponse($jsonProduct, Response::HTTP_OK, ['Location' => $location], true);
-
         // We clear the cache
         $this->tagCache->invalidateTags(['productCache']);
+
+        return new JsonResponse($jsonProduct, Response::HTTP_OK, ['Location' => $location], true);
     }
     /* #endregion */
 
@@ -336,11 +446,40 @@ class ProductController extends AbstractController
      */
     /* #region Doc */
     #[OA\Response(
-        response: 200,
-        description: 'Delete a product',
+        response: 204,
+        description: 'Success',
         content: new OA\JsonContent(
-            type: 'array',
-            items: new OA\Items(ref: new Model(type: Product::class))
+            example: [
+                'message' => 'Product deleted'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, product not deleted'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -353,7 +492,6 @@ class ProductController extends AbstractController
     #[OA\Tag(name: 'Product')]
     /* #endregion */
     #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
     #[Route('/api/product/{id}', name: 'app_delete_product', methods: 'DELETE')]
     public function deleteUser(Product $product): JsonResponse
     {
@@ -362,8 +500,8 @@ class ProductController extends AbstractController
         $this->em->remove($product);
         $this->em->flush();
 
-        // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
-        return new JsonResponse(['status' => 'Product ' . $productId . ' deleted'], Response::HTTP_OK);
+        // Return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(['message' => 'Product' . $productId . 'deleted'], Response::HTTP_NO_CONTENT);
     }
     /* #endregion */
 }

@@ -24,7 +24,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *         absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -37,7 +37,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -50,7 +50,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -63,7 +63,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -75,8 +75,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
- *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *          groups = { "customer" },
+ *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))",
  *      )
  * )
  * 
@@ -101,7 +101,7 @@ class User implements PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
-    #[Groups(['user'])]
+    #[Groups(['password'])]
     #[Since('1.0')]
     private ?string $password = null;
 

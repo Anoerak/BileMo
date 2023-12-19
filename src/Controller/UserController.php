@@ -77,10 +77,38 @@ class UserController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return all users',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'No Users found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -147,10 +175,38 @@ class UserController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return one user',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'User not found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -201,11 +257,39 @@ class UserController extends AbstractController
      */
     /* #region Doc */
     #[OA\Response(
-        response: 201,
-        description: 'Create a user',
+        response: 200,
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, User not created'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -229,7 +313,7 @@ class UserController extends AbstractController
     #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user', name: 'app_create_user', methods: 'POST')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     public function createUser(Request $request, UserPasswordHasherInterface $encoder): JsonResponse
     {
         /*----------------------------------
@@ -304,6 +388,9 @@ class UserController extends AbstractController
 
         $location = $this->router->generate('app_detail_user', ['id' => $user->getId()]);
 
+        // We clear the cache
+        $this->tagCache->invalidateTags(['customerCache']);
+
         return new JsonResponse($jsonUser, Response::HTTP_CREATED, ['Location' => $location], true);
     }
     /* #endregion */
@@ -315,10 +402,38 @@ class UserController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Update a user',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: User::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, User not updated'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -347,7 +462,7 @@ class UserController extends AbstractController
     #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user/{id}', name: 'app_update_user', methods: 'PUT')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     public function updateCustomer(User $user, Request $request): JsonResponse
     {
 
@@ -371,10 +486,10 @@ class UserController extends AbstractController
 
         $location = $this->router->generate('app_detail_user', ['id' => $user->getId()]);
 
-        return new JsonResponse($jsonUser, Response::HTTP_OK, ['Location' => $location], true);
-
         // We clear the cache
         $this->tagCache->invalidateTags(['customerCache']);
+
+        return new JsonResponse($jsonUser, Response::HTTP_OK, ['Location' => $location], true);
     }
     /* #endregion */
 
@@ -384,11 +499,40 @@ class UserController extends AbstractController
      */
     /* #region Doc */
     #[OA\Response(
-        response: 200,
-        description: 'Delete a user',
+        response: 204,
+        description: 'Success',
         content: new OA\JsonContent(
-            type: 'array',
-            items: new OA\Items(ref: new Model(type: User::class))
+            example: [
+                'status' => 'User deleted'
+            ],
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, User not deleted'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -401,7 +545,7 @@ class UserController extends AbstractController
     #[OA\Tag(name: 'User')]
     /* #endregion */
     #[Route('/api/user/{id}', name: 'app_delete_user', methods: 'DELETE')]
-    #[IsGranted('ROLE_ADMIN', message: 'You are not allowed to access this resource')]
+    #[IsGranted('ROLE_USER', message: 'You are not allowed to access this resource')]
     public function deleteUser(User $user): JsonResponse
     {
         $userId = $user->getId();
@@ -409,8 +553,8 @@ class UserController extends AbstractController
         $this->em->remove($user);
         $this->em->flush();
 
-        // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
-        return new JsonResponse(['status' => 'User ' . $userId . ' deleted'], Response::HTTP_OK);
+        // Return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(['status' => 'User' . $userId .  'deleted'], Response::HTTP_NO_CONTENT);
     }
     /* #endregion */
 }

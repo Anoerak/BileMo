@@ -50,7 +50,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -63,7 +63,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
@@ -75,7 +75,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *          absolute = true
  *      ),
  *      exclusion = @Hateoas\Exclusion(
- *          groups = { "admin" },
+ *          groups = { "customer" },
  *          excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
  *      )
  * )
