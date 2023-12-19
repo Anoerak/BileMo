@@ -22,7 +22,7 @@ class UpdateEntitiesService
 		$this->encoder = $encoder;
 	}
 
-	public function update(object $entity, object $data, object $request): ?JsonResponse
+	public function update(object $entity, object $data, object $request)
 	{
 		switch (get_class($entity)) {
 				/* #region Customer Entity */
@@ -40,11 +40,12 @@ class UpdateEntitiesService
 				// We get the arrays from the request
 				$context = $request->toArray();
 				// We check if there are Users affected to this new Customer
-				$users = isset($context['users']) ? $context['users'] : null;
-				// We loop the array to get the User based on his id and add it to the Customer's Users collection.
-				if ($users) {
-					foreach ($users as $user) {
-						$user = $this->em->getRepository(User::class)->findBy(['id' => $user]);
+				if (isset($context['user'])) {
+					foreach ($context['user'] as $userId) {
+						$user = $this->em->getRepository(User::class)->findBy(['id' => $userId]);
+						if (!$user) {
+							return new JsonResponse(['message' => 'This user does not exist'], Response::HTTP_BAD_REQUEST);
+						}
 						$entity->addUser($user[0]);
 					}
 				}

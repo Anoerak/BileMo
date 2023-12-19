@@ -75,10 +75,38 @@ class CustomerController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return all customers',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Customer::class)),
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'No customer found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -131,10 +159,38 @@ class CustomerController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Return one customer',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Customer::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'No customer found'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -166,10 +222,38 @@ class CustomerController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 201,
-        description: 'Create a customer',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Customer::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, customer not created'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -261,10 +345,38 @@ class CustomerController extends AbstractController
     /* #region Doc */
     #[OA\Response(
         response: 200,
-        description: 'Update a customer',
+        description: 'Success',
         content: new OA\JsonContent(
             type: 'array',
             items: new OA\Items(ref: new Model(type: Customer::class))
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, customer not updated'
+            ]
         )
     )]
     #[OA\RequestBody(
@@ -274,7 +386,6 @@ class CustomerController extends AbstractController
             title: 'Modify a Customer',
             description: 'Replace the "users" values with the id of the users you want to add to the customer',
             example: [
-                'name' => 'John Wayne',
                 'email' => 'johnwayne@farwest.com',
                 'password' => 'password',
                 'users' => [1, 2]
@@ -308,15 +419,15 @@ class CustomerController extends AbstractController
         $this->em->flush();
 
         // We prepare the Response
-        $context = SerializationContext::create()->setGroups(['admin']);
+        $context = SerializationContext::create()->setGroups(['customer']);
         $jsonCustomer = $this->jmsSerializer->serialize($customer, 'json', $context);
 
         $location = $this->router->generate('app_detail_customer', ['id' => $customer->getId()]);
 
-        return new JsonResponse($jsonCustomer, Response::HTTP_OK, ['Location' => $location], true);
-
         // We clear the cache
         $this->tagCache->invalidateTags(['customerCache']);
+
+        return new JsonResponse($jsonCustomer, Response::HTTP_CREATED, ['Location' => $location], true);
     }
     /* #endregion */
 
@@ -326,11 +437,40 @@ class CustomerController extends AbstractController
      */
     /* #region  */
     #[OA\Response(
-        response: 200,
-        description: 'Delete a customer',
+        response: 204,
+        description: 'Success',
         content: new OA\JsonContent(
-            type: 'array',
-            items: new OA\Items(ref: new Model(type: Customer::class))
+            example: [
+                'status' => 'Customer deleted'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 401,
+        description: 'Unauthorized',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'JWT Token not found'
+            ]
+        )
+
+    )]
+    #[OA\Response(
+        response: 403,
+        description: 'Forbidden',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'You are not allowed to access this resource'
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Not Found',
+        content: new OA\JsonContent(
+            example: [
+                'message' => 'Something went wrong, customer not deleted'
+            ]
         )
     )]
     #[OA\Parameter(
@@ -351,7 +491,7 @@ class CustomerController extends AbstractController
         $this->em->flush();
 
         // Return new JsonResponse(null, Response::HTTP_NO_CONTENT)
-        return new JsonResponse(['status' => 'Customer ' . $customerId . ' deleted'], Response::HTTP_OK);
+        return new JsonResponse(['status' => 'Customer' . $customerId . 'deleted'], Response::HTTP_NO_CONTENT);
     }
     /* #endregion */
 }
